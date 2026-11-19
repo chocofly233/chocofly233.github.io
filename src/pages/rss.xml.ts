@@ -68,14 +68,21 @@ const GET = async (context: AstroGlobal) => {
     description: config.description || 'A blog built with Astro',
     site: import.meta.env.SITE,
     items: await Promise.all(
-      allPostsByDate.map(async (post) => ({
-        pubDate: post.data.publishDate,
-        link: `/blog/${post.id}`,
-        customData: `<h:img src="${typeof post.data.heroImage?.src === 'string' ? post.data.heroImage?.src : post.data.heroImage?.src.src}" />
-          <enclosure url="${typeof post.data.heroImage?.src === 'string' ? post.data.heroImage?.src : post.data.heroImage?.src.src}" />`,
-        content: await renderContent(post, siteUrl),
-        ...post.data
-      }))
+      allPostsByDate.map(async (post) => {
+        const cover = post.data.heroImage?.src
+        const coverPath = typeof cover === 'string' ? cover : cover?.src
+        const imageUrl = coverPath
+          ? new URL(coverPath, siteUrl).href.replaceAll('&', '&amp;').replaceAll('"', '&quot;')
+          : undefined
+
+        return {
+          pubDate: post.data.publishDate,
+          link: `/blog/${post.id}`,
+          customData: imageUrl ? `<h:img src="${imageUrl}" />` : undefined,
+          content: await renderContent(post, siteUrl),
+          ...post.data
+        }
+      })
     )
   })
 }

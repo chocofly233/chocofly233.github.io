@@ -1,0 +1,77 @@
+---
+import { Image } from 'astro:assets'
+import { getRelativeLocaleUrl } from 'astro:i18n'
+
+import { PostPreview } from '@/components/pages'
+import { Button } from '@/components/user'
+import PageLayout from '@/layouts/BaseLayout.astro'
+import { getBlogCollection, getBlogCollectionEn } from '@/server'
+import config from '@/site-config'
+
+const locale = Astro.currentLocale ?? 'zh'
+const isEnglish = locale === 'en'
+const posts = await (isEnglish ? getBlogCollectionEn() : getBlogCollection())
+const latestPosts = posts
+  .sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf())
+  .slice(0, 6)
+const firstPost = latestPosts[0]
+const cover = firstPost?.data.heroImage
+const listPosts = cover ? latestPosts.slice(1) : latestPosts
+const formatDate = new Intl.DateTimeFormat(isEnglish ? 'en-US' : 'zh-CN', {
+  dateStyle: 'long',
+  timeZone: 'UTC'
+})
+const description = isEnglish ? config.description_en : config.description
+---
+
+<PageLayout meta={{ title: isEnglish ? 'Home' : '首页', description }}>
+  <main class='mx-auto max-w-4xl'>
+    <section class='animate pb-10 sm:pb-14' id='content-header'>
+      <h1 class='mb-4 text-4xl font-bold tracking-tight sm:text-5xl'>
+        {isEnglish ? 'Margin Notes' : config.title}
+      </h1>
+      <p class='text-base text-muted-foreground sm:text-lg'>{description}</p>
+    </section>
+    <section class='animate' id='content' aria-labelledby='latest-posts'>
+      <div class='mb-4 flex flex-wrap items-center justify-between gap-3'>
+        <h2 class='text-2xl font-medium' id='latest-posts'>
+          {isEnglish ? 'Latest posts' : '最新文章'}
+        </h2>
+        <Button
+          title={isEnglish ? 'All posts' : '查看归档'}
+          href={getRelativeLocaleUrl(locale, 'archives')}
+          style='ahead'
+        />
+      </div>
+      {firstPost && cover && (
+        <a
+          class='group mb-5 grid overflow-hidden rounded-2xl border border-border hover:border-primary/50 sm:grid-cols-2'
+          href={getRelativeLocaleUrl(locale, `blog/${firstPost.id}`)}
+          data-astro-prefetch
+        >
+          <div class='flex flex-col justify-center p-5 sm:p-7'>
+            <time class='mb-2 text-sm text-muted-foreground' datetime={firstPost.data.publishDate.toISOString()}>
+              {formatDate.format(firstPost.data.publishDate)}
+            </time>
+            <h3 class='mb-2 text-2xl font-semibold group-hover:text-primary'>{firstPost.data.title}</h3>
+            <p class='text-sm text-muted-foreground'>{firstPost.data.description}</p>
+          </div>
+          <Image
+            src={cover.src}
+            alt={cover.alt ?? ''}
+            class='h-full max-h-60 min-h-36 w-full object-cover'
+            loading='eager'
+          />
+        </a>
+      )}
+      {listPosts.length > 0 && (
+        <ul class='flex flex-col gap-3'>
+          {listPosts.map((post) => <PostPreview {post} />)}
+        </ul>
+      )}
+      {latestPosts.length === 0 && (
+        <p class='text-muted-foreground'>{isEnglish ? 'No posts yet.' : '文章即将更新。'}</p>
+      )}
+    </section>
+  </main>
+</PageLayout>

@@ -11,14 +11,10 @@ const { content, class: className, ...props } = Astro.props
 
 <script is:inline src={`${config.npmCDN}/qrcodejs/qrcode.min.js`}></script>
 <script is:inline define:vars={{ content }}>
-  const renderContent = content ?? window.location.href
-  // Load qrcode
-  function loadqrcode(qrcodeContainer) {
-    if (!qrcodeContainer) throw new Error('qrcode container not found')
-    if (qrcodeContainer.innerHTML !== '') return
-    new QRCode(qrcodeContainer, renderContent)
-  }
   const qrcodeContainer = document.getElementById('qrcode-container')
-  if (!qrcodeContainer) throw new Error('qrcode container not found')
-  loadqrcode(qrcodeContainer)
+  if (qrcodeContainer && typeof QRCode === 'function') {
+    new QRCode(qrcodeContainer, content ?? window.location.href)
+  } else {
+    document.getElementById('get-qrcode')?.setAttribute('hidden', '')
+  }
 </script>

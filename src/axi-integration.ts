@@ -91,12 +91,16 @@ export default function AstroAxiIntegration(opts: UserInputConfig): AstroIntegra
         const targetDir = fileURLToPath(dir)
         const cwd = dirname(fileURLToPath(import.meta.url))
         const relativeDir = relative(cwd, targetDir)
-        return new Promise<void>((resolve) => {
-          spawn('npx', ['-y', 'pagefind', '--site', relativeDir], {
+        return new Promise<void>((resolve, reject) => {
+          const pagefind = spawn('pnpm', ['exec', 'pagefind', '--site', relativeDir], {
             stdio: 'inherit',
-            shell: true,
             cwd
-          }).on('close', () => resolve())
+          })
+          pagefind.on('error', reject)
+          pagefind.on('close', (code) => {
+            if (code === 0) resolve()
+            else reject(new Error(`Pagefind exited with code ${code}`))
+          })
         })
       }
     }

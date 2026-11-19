@@ -30,14 +30,21 @@ import {
 } from './src/plugins/shiki-transformers.ts'
 import config from './src/site.config.ts'
 
-const platform = process.env.DEPLOYMENT_PLATFORM || 'vercel'
+const platform = process.env.DEPLOYMENT_PLATFORM || 'github'
 const isCloudflare = platform === 'cloudflare'
 const isGithubPages = platform === 'github'
+const pagesHost = process.env.GITHUB_REPOSITORY_OWNER
+  ? `${process.env.GITHUB_REPOSITORY_OWNER.toLowerCase()}.github.io`
+  : config.personal?.domains?.githubPages || 'localhost:4321'
 
 // https://astro.build/config
 export default defineConfig({
   // Top-Level Options
-  site: isGithubPages ? `https://${config.personal?.domains?.githubPages || 'example.github.io'}/` : (isCloudflare ? `https://${config.personal?.domains?.cloudflare || 'example.pages.dev'}/` : `https://${config.personal?.domains?.main || 'example.com'}/`),
+  site: isGithubPages
+    ? process.env.SITE_URL || `${pagesHost.startsWith('localhost:') ? 'http' : 'https'}://${pagesHost}/`
+    : isCloudflare
+      ? `https://${config.personal?.domains?.cloudflare || 'example.pages.dev'}/`
+      : `https://${config.personal?.domains?.main || 'example.com'}/`,
   // base: '/docs',
   trailingSlash: 'never',
 
@@ -72,9 +79,9 @@ export default defineConfig({
 
     // Temporary fix vercel adapter
     // static build method is not needed
-    outputCopier({
+    ...(platform === 'vercel' ? [outputCopier({
       integ: ['sitemap', 'pagefind']
-    })
+    })] : [])
   ],
   // root: './my-project-directory',
 

@@ -1,23 +1,23 @@
-import type { CardListData, Config, IntegrationUserConfig, ThemeUserConfig } from './types'
+import type { Config, IntegrationUserConfig, ThemeUserConfig } from './types'
 
 export const theme: ThemeUserConfig = {
   // === Basic configuration ===
   /** Title for your website. Will be used in metadata and as browser tab title. */
-  title: "Axi Theme 使用文档",
+  title: '页边笔记',
   /** Will be used in index page & copyright declaration */
-  author: 'Axi Theme',
-  author_en: 'Axi Theme',
+  author: '页边笔记',
+  author_en: 'Margin Notes',
   /** Description metadata for your website. Can be used in page metadata. */
-  description: 'Axi Theme 使用文档',
-  description_en: 'Axi Theme Documentation',
+  description: '阅读笔记、技术随笔与日常记录。',
+  description_en: 'Reading notes, technical writing, and everyday observations.',
   /** The default favicon for your site which should be a path to an image in the `public/` directory. */
   favicon: '/favicon/favicon.ico',
   /** Specify the default language for this site. */
   locale: {
-    lang: 'en-US',
-    attrs: 'en_US',
+    lang: 'zh-CN',
+    attrs: 'zh_CN',
     // Date locale
-    dateLocale: 'en-US',
+    dateLocale: 'zh-CN',
     dateOptions: {
       day: 'numeric',
       month: 'short',
@@ -42,11 +42,9 @@ export const theme: ThemeUserConfig = {
   /** Configure the header of your site. */
   header: {
     menu: [
-      { title: 'Blog', link: '/blog/research' },
-      { title: 'Academic', link: '/academic' },
-      { title: 'Projects', link: '/projects' },
-      { title: 'Links', link: '/links' },
-      { title: 'About', link: '/about' }
+      { title: '文章归档', link: '/archives' },
+      { title: '标签', link: '/tags' },
+      { title: '关于', link: '/about' }
     ]
   },
 
@@ -61,7 +59,7 @@ export const theme: ThemeUserConfig = {
     /** Enable displaying a "Astro & Axi theme powered" link in your site's footer. */
     credits: true,
     /** Optional details about the social media accounts for this site. */
-    social: { github: 'https://github.com/Axi404/Axi-Theme' }
+    social: {}
   },
 
   content: {
@@ -73,26 +71,8 @@ export const theme: ThemeUserConfig = {
     share: ['weibo', 'x', 'bluesky']
   },
 
-  /** Personal information configuration */
-  personal: {
-    /** Your location */
-    location: 'China',
-    /** Your GitHub username */
-    githubUsername: 'Axi404',
-    /** Your email address */
-    email: 'gaoning@pjlab.org.cn',
-    /** Your Google Scholar profile URL */
-    googleScholar: 'https://scholar.google.com/citations?user=W9mT0rcAAAAJ&hl=zh-CN',
-    /** Blog start date for statistics */
-    blogStartDate: '2024-06-15',
-    /** Domain configuration */
-    domains: {
-      main: 'theme.axi404.top',
-      // githubPages: '',
-      // cloudflare: '',
-      // friendCircle: '',
-    },
-  }
+  /** Add public contact information here when ready. */
+  personal: {}
 }
 
 export const integ: IntegrationUserConfig = {
@@ -151,28 +131,6 @@ export const integ: IntegrationUserConfig = {
       imageUploader: false
     }
   }
-}
-
-export const terms: CardListData = {
-  title: 'Terms content',
-  list: [
-    {
-      title: 'Privacy Policy',
-      link: '/terms/privacy-policy'
-    },
-    {
-      title: 'Terms and Conditions',
-      link: '/terms/terms-and-conditions'
-    },
-    {
-      title: 'Copyright',
-      link: '/terms/copyright'
-    },
-    {
-      title: 'Disclaimer',
-      link: '/terms/disclaimer'
-    }
-  ]
 }
 
 const config = { ...theme, integ } as Config
