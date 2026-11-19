@@ -1,156 +1,261 @@
 ---
+import { Image } from 'astro:assets'
 import { getRelativeLocaleUrl } from 'astro:i18n'
 
+import banner from '@/assets/home-banner.webp'
+import { Icon } from '@/components/user'
 import PageLayout from '@/layouts/BaseLayout.astro'
 import { getBlogCollection, getBlogCollectionEn } from '@/server'
-import { profile } from '../../profile'
+import config from '@/site-config'
+import { featuredProject, profile } from '../../profile'
 
 const locale = Astro.currentLocale ?? 'zh'
 const isEnglish = locale === 'en'
 const labels = isEnglish
   ? {
-      home: 'Personal homepage', name: 'Name', email: 'Email',
-      education: 'Education', school: 'University', department: 'Department / major',
-      degree: 'Degree / year', period: 'Enrollment period',
-      work: 'Writing and awards', articles: 'Articles', awards: 'Awards',
-      latest: 'Latest blog posts', allPosts: 'View blog', emptyBlog: 'No posts yet.'
+      email: 'Email', education: 'Education', school: 'University', department: 'Department / major',
+      degree: 'Degree / year', period: 'Enrollment period', articles: 'Articles', awards: 'Awards',
+      latest: 'Latest posts', allPosts: 'Read the blog', project: 'Project', emptyBlog: 'No posts yet.'
     }
   : {
-      home: '个人主页', name: '姓名', email: '邮箱',
-      education: '学籍', school: '学校', department: '院系 / 专业',
-      degree: '学位 / 年级', period: '就读时间',
-      work: '文章、获奖和博客', articles: '文章', awards: '获奖',
-      latest: '最新博客', allPosts: '查看博客', emptyBlog: '暂无博客文章。'
+      email: '邮箱', education: '学籍', school: '学校', department: '院系 / 专业',
+      degree: '学位 / 年级', period: '就读时间', articles: '文章', awards: '获奖',
+      latest: '最新博客', allPosts: '阅读博客', project: '代码项目', emptyBlog: '暂无博客文章。'
     }
+
+const name = profile.name || profile.githubUsername
+const github = `https://github.com/${profile.githubUsername}`
+const blogUrl = getRelativeLocaleUrl(locale, 'blog')
+const description = isEnglish ? config.description_en : config.description
 const education = [
   { label: labels.school, value: profile.school },
   { label: labels.department, value: profile.department },
   { label: labels.degree, value: profile.degree },
   { label: labels.period, value: profile.enrollmentPeriod }
-]
+].filter(({ value }) => value)
 const posts = await (isEnglish ? getBlogCollectionEn() : getBlogCollection())
-const latestPosts = posts
+const [topPost, ...morePosts] = posts
   .sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf())
   .slice(0, 3)
+const cover = topPost?.data.heroImage
 const formatDate = new Intl.DateTimeFormat(isEnglish ? 'en' : 'zh-CN', {
   dateStyle: 'medium',
   timeZone: 'UTC'
 })
 ---
 
-<PageLayout meta={{ title: profile.name || labels.home }}>
-  <main class='site-column flex flex-col gap-5'>
-    <section class='site-panel profile-intro' aria-labelledby='profile-title'>
-      <h1 class='site-page-title' id='profile-title'>{profile.name || labels.home}</h1>
-      <dl class='profile-details'>
-        {!profile.name && <div><dt>{labels.name}</dt><dd>—</dd></div>}
-        <div>
-          <dt>{labels.email}</dt>
-          <dd>
-            {profile.email ? <a href={`mailto:${profile.email}`}>{profile.email}</a> : '—'}
-          </dd>
-        </div>
-      </dl>
-    </section>
-
-    <section class='site-panel' aria-labelledby='education-title'>
-      <h2 class='site-section-title' id='education-title'>{labels.education}</h2>
-      <dl class='profile-details'>
-        {education.map(({ label, value }) => (
-          <div>
-            <dt>{label}</dt>
-            <dd>{value || '—'}</dd>
-          </div>
-        ))}
-      </dl>
-    </section>
-
-    <section class='site-panel' aria-label={labels.work}>
-      <div class='profile-work'>
-        <section aria-labelledby='articles-title'>
-          <h2 class='site-section-title' id='articles-title'>{labels.articles}</h2>
-        </section>
-        <section aria-labelledby='awards-title'>
-          <h2 class='site-section-title' id='awards-title'>{labels.awards}</h2>
-        </section>
-      </div>
-      <section class='profile-blog' aria-labelledby='latest-title'>
-        <div class='flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1'>
-          <h2 class='site-section-title' id='latest-title'>{labels.latest}</h2>
-          <a class='site-text-link' href={getRelativeLocaleUrl(locale, 'blog')}>
+<PageLayout meta={{ title: name, description }}>
+  <main class='home-shell'>
+    <section class='profile-hero' aria-labelledby='home-title'>
+      <Image src={banner} alt='' class='profile-banner' loading='eager' fetchpriority='high' />
+      <div class='profile-intro'>
+        <h1 id='home-title'>{name}</h1>
+        <p>{description}</p>
+        <div class='profile-actions'>
+          <a href={blogUrl} class='profile-action primary-action'>
             {labels.allPosts} <span aria-hidden='true'>↗</span>
           </a>
+          <a href={github} class='profile-action secondary-action'>
+            <Icon name='github' class='size-4' /> GitHub
+          </a>
+          {profile.email && <a href={`mailto:${profile.email}`} class='profile-action secondary-action'>
+            <Icon name='email' class='size-4' /> {labels.email}
+          </a>}
         </div>
-        {latestPosts.length > 0 ? (
+      </div>
+    </section>
+
+    <div class='home-grid'>
+      <section class='journal' aria-labelledby='latest-title'>
+        <div class='home-section-heading'>
+          <h2 class='site-section-title' id='latest-title'>{labels.latest}</h2>
+          <a class='site-text-link' href={blogUrl}>{isEnglish ? 'All posts' : '全部博文'} <span aria-hidden='true'>↗</span></a>
+        </div>
+        {topPost ? (
+          <article class='home-story'>
+            <a class:list={['story-link', { 'has-cover': cover }]} href={getRelativeLocaleUrl(locale, `blog/${topPost.id}`)}>
+              {cover && <Image src={cover.src} alt='' class='story-cover' width={440} height={258} fit='cover' />}
+              <div class='story-copy'>
+                <time datetime={topPost.data.publishDate.toISOString()}>{formatDate.format(topPost.data.publishDate)}</time>
+                <h3>{topPost.data.title}</h3>
+                <p>{topPost.data.description}</p>
+              </div>
+            </a>
+          </article>
+        ) : <p class='text-sm text-muted-foreground'>{labels.emptyBlog}</p>}
+        {morePosts.length > 0 && (
           <ul class='mt-2 divide-y divide-border'>
-            {latestPosts.map((post) => (
+            {morePosts.map((post) => (
               <li>
-                <a class='profile-post' href={getRelativeLocaleUrl(locale, `blog/${post.id}`)}>
+                <a class='story-row' href={getRelativeLocaleUrl(locale, `blog/${post.id}`)}>
                   <span>{post.data.title}</span>
-                  <time datetime={post.data.publishDate.toISOString()}>
-                    {formatDate.format(post.data.publishDate)}
-                  </time>
+                  <time datetime={post.data.publishDate.toISOString()}>{formatDate.format(post.data.publishDate)}</time>
                 </a>
               </li>
             ))}
           </ul>
-        ) : (
-          <p class='mt-2 text-sm text-muted-foreground'>{labels.emptyBlog}</p>
         )}
+        <div class='home-index'>
+          <section aria-labelledby='articles-title'><h3 id='articles-title'>{labels.articles}</h3></section>
+          <section aria-labelledby='awards-title'><h3 id='awards-title'>{labels.awards}</h3></section>
+        </div>
       </section>
-    </section>
+
+      <aside class='profile-aside'>
+        <section aria-labelledby='project-title'>
+          <div class='home-section-heading'>
+            <h2 class='site-section-title' id='project-title'>{labels.project}</h2>
+          </div>
+          <a class='project-card' href={featuredProject.url}>
+            <Icon name='github' class='size-5 shrink-0' />
+            <h3>{featuredProject.title}</h3>
+            <span aria-hidden='true'>↗</span>
+            <p>{isEnglish ? featuredProject.descriptionEn : featuredProject.description}</p>
+          </a>
+        </section>
+        <section class='profile-education' aria-labelledby='education-title'>
+          <h2 class='site-section-title' id='education-title'>{labels.education}</h2>
+          {education.length > 0 && (
+            <dl>
+              {education.map(({ label, value }) => (
+                <div><dt>{label}</dt><dd>{value}</dd></div>
+              ))}
+            </dl>
+          )}
+        </section>
+      </aside>
+    </div>
   </main>
 </PageLayout>
 
 <style>
-  .profile-intro {
-    border-top: 3px solid hsl(var(--primary));
-  }
+  .home-shell { margin-inline: auto; max-width: 61rem; }
 
-  .profile-details {
+  .profile-hero {
+    position: relative;
+    isolation: isolate;
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1rem 1.75rem;
-    margin-top: 1rem;
+    align-items: end;
+    min-height: clamp(19rem, 34vw, 24rem);
+    padding: clamp(1.45rem, 5vw, 3.5rem);
+    overflow: hidden;
+    border-radius: 1.35rem;
+    background: #202540;
+    color: #fff;
   }
 
-  .profile-intro .profile-details {
-    border-top: 1px solid hsl(var(--border));
-    padding-top: 1rem;
+  .profile-banner, .profile-hero::after {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
   }
 
-  .profile-details dt, .profile-post time {
-    color: hsl(var(--muted-foreground));
-    font-size: 0.875rem;
+  .profile-banner { z-index: -2; object-fit: cover; object-position: 67% center; }
+  .profile-hero::after {
+    z-index: -1;
+    content: '';
+    background: linear-gradient(90deg, rgb(12 17 38 / 76%), rgb(18 22 47 / 35%) 52%, rgb(18 22 47 / 0%) 88%),
+      linear-gradient(0deg, rgb(12 15 35 / 54%), transparent 76%);
   }
 
-  .profile-details dd {
-    margin-top: 0.25rem;
+  .profile-intro h1 {
+    font-size: clamp(2.25rem, 7vw, 4.45rem);
+    font-weight: 700;
+    line-height: 1.06;
+    letter-spacing: -0.045em;
     overflow-wrap: anywhere;
   }
 
-  .profile-details a { text-decoration: underline; text-underline-offset: 0.2em; }
+  .profile-intro p { max-width: 32rem; margin-top: 0.75rem; color: #edeef9; }
+  .profile-actions { display: flex; flex-wrap: wrap; gap: 0.65rem; margin-top: 1.3rem; }
+  .profile-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    padding: 0.6rem 0.95rem;
+    border: 1px solid rgb(255 255 255 / 55%);
+    border-radius: 0.6rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
 
-  .profile-work {
+  .primary-action { background: #fff; color: #252e55; }
+  .primary-action:hover { background: #e6eaff; color: #202d5d; }
+  .secondary-action { background: rgb(16 20 41 / 28%); color: #fff; }
+  .secondary-action:hover { background: rgb(16 20 41 / 55%); color: #fff; }
+
+  .home-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1rem 1.75rem;
+    grid-template-columns: minmax(0, 1.9fr) minmax(0, 1fr);
+    gap: clamp(1.4rem, 4vw, 2.6rem);
+    padding-top: clamp(1.7rem, 4vw, 2.5rem);
   }
 
-  .profile-blog {
-    border-top: 1px solid hsl(var(--border));
-    margin-top: 1.15rem;
-    padding-top: 1.15rem;
-  }
-
-  .profile-post {
+  .home-section-heading {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 0.25rem 1rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .story-link, .project-card {
+    border: 1px solid hsl(var(--border));
+    border-radius: 0.9rem;
+    background: hsl(var(--card));
+    transition: border-color 180ms ease-out;
+  }
+
+  .story-link:hover, .project-card:hover { border-color: hsl(var(--primary) / 0.65); }
+  .story-link { display: grid; align-items: center; overflow: hidden; }
+  .story-link.has-cover { grid-template-columns: minmax(0, 1fr) minmax(0, 1.55fr); }
+  .story-cover { width: 100%; height: 100%; min-height: 9.5rem; object-fit: cover; }
+  .story-copy { padding: clamp(1.05rem, 2.5vw, 1.45rem); }
+  .story-copy h3 { margin-top: 0.35rem; font-size: 1.175rem; font-weight: 650; line-height: 1.35; }
+  .story-copy p, .project-card p { margin-top: 0.35rem; color: hsl(var(--muted-foreground)); font-size: 0.875rem; }
+  .story-copy time, .story-row time { color: hsl(var(--muted-foreground)); font-size: 0.79rem; }
+
+  .story-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
     min-height: 44px;
     padding: 0.65rem 0;
-    font-weight: 500;
+  }
+
+  .project-card {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.5rem 0.6rem;
+    min-height: 9.5rem;
+    align-content: center;
+    padding: 1.1rem;
+  }
+
+  .project-card h3 { overflow-wrap: anywhere; font-size: 0.94rem; font-weight: 650; }
+  .project-card > span { color: hsl(var(--primary)); }
+  .project-card p { grid-column: 1 / -1; }
+  .profile-education, .home-index { margin-top: 1.4rem; padding-top: 1.1rem; border-top: 1px solid hsl(var(--border)); }
+  .home-index { display: flex; gap: 1.85rem; flex-wrap: wrap; }
+  .home-index h3 { font-weight: 600; }
+  .profile-education dl { display: grid; gap: 0.6rem; margin-top: 0.75rem; }
+  .profile-education dt { font-size: 0.81rem; color: hsl(var(--muted-foreground)); }
+  .profile-education dd { overflow-wrap: anywhere; }
+
+  @media (max-width: 700px) {
+    .home-grid { grid-template-columns: minmax(0, 1fr); }
+    .project-card { min-height: 0; }
+  }
+
+  @media (max-width: 440px) {
+    .profile-hero { border-radius: 1rem; }
+    .story-link.has-cover { grid-template-columns: minmax(0, 1fr); }
+    .story-cover { height: 9rem; min-height: 0; }
   }
 </style>

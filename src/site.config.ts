@@ -1,12 +1,13 @@
 import type { Config, IntegrationUserConfig, ThemeUserConfig } from './types'
+import { profile } from './profile'
 
 export const theme: ThemeUserConfig = {
   // === Basic configuration ===
   /** Title for your website. Will be used in metadata and as browser tab title. */
   title: '页边笔记',
   /** Will be used in index page & copyright declaration */
-  author: '页边笔记',
-  author_en: 'Margin Notes',
+  author: profile.name || profile.githubUsername,
+  author_en: profile.name || profile.githubUsername,
   /** Description metadata for your website. Can be used in page metadata. */
   description: '阅读笔记、技术随笔与日常记录。',
   description_en: 'Reading notes, technical writing, and everyday observations.',
