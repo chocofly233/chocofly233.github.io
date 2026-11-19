@@ -1,0 +1,156 @@
+---
+import { getRelativeLocaleUrl } from 'astro:i18n'
+
+import PageLayout from '@/layouts/BaseLayout.astro'
+import { getBlogCollection, getBlogCollectionEn } from '@/server'
+import { profile } from '../../profile'
+
+const locale = Astro.currentLocale ?? 'zh'
+const isEnglish = locale === 'en'
+const labels = isEnglish
+  ? {
+      home: 'Personal homepage', name: 'Name', email: 'Email',
+      education: 'Education', school: 'University', department: 'Department / major',
+      degree: 'Degree / year', period: 'Enrollment period',
+      work: 'Writing and awards', articles: 'Articles', awards: 'Awards',
+      latest: 'Latest blog posts', allPosts: 'View blog', emptyBlog: 'No posts yet.'
+    }
+  : {
+      home: '个人主页', name: '姓名', email: '邮箱',
+      education: '学籍', school: '学校', department: '院系 / 专业',
+      degree: '学位 / 年级', period: '就读时间',
+      work: '文章、获奖和博客', articles: '文章', awards: '获奖',
+      latest: '最新博客', allPosts: '查看博客', emptyBlog: '暂无博客文章。'
+    }
+const education = [
+  { label: labels.school, value: profile.school },
+  { label: labels.department, value: profile.department },
+  { label: labels.degree, value: profile.degree },
+  { label: labels.period, value: profile.enrollmentPeriod }
+]
+const posts = await (isEnglish ? getBlogCollectionEn() : getBlogCollection())
+const latestPosts = posts
+  .sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf())
+  .slice(0, 3)
+const formatDate = new Intl.DateTimeFormat(isEnglish ? 'en' : 'zh-CN', {
+  dateStyle: 'medium',
+  timeZone: 'UTC'
+})
+---
+
+<PageLayout meta={{ title: profile.name || labels.home }}>
+  <main class='site-column flex flex-col gap-5'>
+    <section class='site-panel profile-intro' aria-labelledby='profile-title'>
+      <h1 class='site-page-title' id='profile-title'>{profile.name || labels.home}</h1>
+      <dl class='profile-details'>
+        {!profile.name && <div><dt>{labels.name}</dt><dd>—</dd></div>}
+        <div>
+          <dt>{labels.email}</dt>
+          <dd>
+            {profile.email ? <a href={`mailto:${profile.email}`}>{profile.email}</a> : '—'}
+          </dd>
+        </div>
+      </dl>
+    </section>
+
+    <section class='site-panel' aria-labelledby='education-title'>
+      <h2 class='site-section-title' id='education-title'>{labels.education}</h2>
+      <dl class='profile-details'>
+        {education.map(({ label, value }) => (
+          <div>
+            <dt>{label}</dt>
+            <dd>{value || '—'}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+
+    <section class='site-panel' aria-label={labels.work}>
+      <div class='profile-work'>
+        <section aria-labelledby='articles-title'>
+          <h2 class='site-section-title' id='articles-title'>{labels.articles}</h2>
+        </section>
+        <section aria-labelledby='awards-title'>
+          <h2 class='site-section-title' id='awards-title'>{labels.awards}</h2>
+        </section>
+      </div>
+      <section class='profile-blog' aria-labelledby='latest-title'>
+        <div class='flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1'>
+          <h2 class='site-section-title' id='latest-title'>{labels.latest}</h2>
+          <a class='site-text-link' href={getRelativeLocaleUrl(locale, 'blog')}>
+            {labels.allPosts} <span aria-hidden='true'>↗</span>
+          </a>
+        </div>
+        {latestPosts.length > 0 ? (
+          <ul class='mt-2 divide-y divide-border'>
+            {latestPosts.map((post) => (
+              <li>
+                <a class='profile-post' href={getRelativeLocaleUrl(locale, `blog/${post.id}`)}>
+                  <span>{post.data.title}</span>
+                  <time datetime={post.data.publishDate.toISOString()}>
+                    {formatDate.format(post.data.publishDate)}
+                  </time>
+                </a>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p class='mt-2 text-sm text-muted-foreground'>{labels.emptyBlog}</p>
+        )}
+      </section>
+    </section>
+  </main>
+</PageLayout>
+
+<style>
+  .profile-intro {
+    border-top: 3px solid hsl(var(--primary));
+  }
+
+  .profile-details {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem 1.75rem;
+    margin-top: 1rem;
+  }
+
+  .profile-intro .profile-details {
+    border-top: 1px solid hsl(var(--border));
+    padding-top: 1rem;
+  }
+
+  .profile-details dt, .profile-post time {
+    color: hsl(var(--muted-foreground));
+    font-size: 0.875rem;
+  }
+
+  .profile-details dd {
+    margin-top: 0.25rem;
+    overflow-wrap: anywhere;
+  }
+
+  .profile-details a { text-decoration: underline; text-underline-offset: 0.2em; }
+
+  .profile-work {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem 1.75rem;
+  }
+
+  .profile-blog {
+    border-top: 1px solid hsl(var(--border));
+    margin-top: 1.15rem;
+    padding-top: 1.15rem;
+  }
+
+  .profile-post {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+    min-height: 44px;
+    padding: 0.65rem 0;
+    font-weight: 500;
+  }
+</style>

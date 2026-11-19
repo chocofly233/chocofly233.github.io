@@ -1,0 +1,33 @@
+---
+import { getRelativeLocaleUrl } from 'astro:i18n'
+
+import { PostPreview } from '@/components/pages'
+import PageLayout from '@/layouts/BaseLayout.astro'
+import { getBlogCollection, getBlogCollectionEn, groupCollectionsByYear, sortMDByDate, type BlogPostEntry } from '@/server'
+
+const locale = Astro.currentLocale ?? 'zh'
+const isEnglish = locale === 'en'
+const title = isEnglish ? 'Archives' : '文章归档'
+const description = isEnglish ? 'Browse blog posts by year.' : '按年份浏览博客文章。'
+const posts: BlogPostEntry[] = await (isEnglish ? getBlogCollectionEn() : getBlogCollection())
+const years = groupCollectionsByYear(sortMDByDate(posts))
+---
+
+<PageLayout meta={{ title, description }}>
+  <main class='site-column'>
+    <section class='site-panel'>
+      <a class='site-text-link' href={getRelativeLocaleUrl(locale, 'blog')}>
+        <span aria-hidden='true'>←</span> {isEnglish ? 'Blog' : '返回博客'}
+      </a>
+      <h1 class='site-page-title mt-3'>{title}</h1>
+      {years.length > 0 ? years.map(([year, entries]) => (
+        <section class='mt-6 border-t pt-4' aria-labelledby={`archive-${year}`}>
+          <h2 class='site-section-title' id={`archive-${year}`}>{year}</h2>
+          <ul class='mt-2 divide-y divide-border'>
+            {entries.map((post) => <PostPreview {post} class='rounded-none border-0 bg-transparent px-0' />)}
+          </ul>
+        </section>
+      )) : <p class='mt-3 text-muted-foreground'>{isEnglish ? 'No posts yet.' : '暂无博客文章。'}</p>}
+    </section>
+  </main>
+</PageLayout>

@@ -10,7 +10,7 @@ const allCollections = await getBlogCollection()
 const allCategories = getUniqueCategories(allCollections)
 
 // Define category display names and filter allowed categories
-const englishLabels: Record<string, string> = { 文章归档: 'Archives', 标签: 'Tags', 关于: 'About' }
+const englishLabels: Record<string, string> = { 首页: 'Home', 博客: 'Blog', 文章归档: 'Archives', 标签: 'Tags' }
 const categoryMap: Record<string, string> = {
   'tech': 'Technical',
   'daily': 'Daily Life',
@@ -35,10 +35,12 @@ function getLocalizedUrl(locale: string | undefined, path: string) {
   }
   return url
 }
+const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/'
+const isEnglish = Astro.currentLocale === 'en'
 ---
 
 <header-component
-  class='group sticky top-4 z-30 mb-12 flex items-center justify-between rounded-xl border border-transparent max-sm:py-1 sm:rounded-2xl [&.not-top]:border-border [&.not-top]:bg-background/60 [&.not-top]:px-1.5 [&.not-top]:backdrop-blur-md dark:[&.not-top]:bg-muted/60'
+  class='group sticky top-4 z-30 mb-8 sm:mb-10 flex items-center justify-between rounded-xl border border-transparent max-sm:py-1 sm:rounded-2xl [&.not-top]:border-border [&.not-top]:bg-background/80 [&.not-top]:px-1.5 [&.not-top]:backdrop-blur-md dark:[&.not-top]:bg-muted/60'
 >
   <!-- <div
       class='absolute -left-4 -top-8 -z-10 box-content hidden h-20 w-[calc(100%+2rem)] !duration-0 max-sm:group-[.expanded]:block max-sm:group-[.expanded.not-top]:hidden max-sm:group-[.expanded]:bg-white dark:max-sm:group-[.expanded]:bg-muted'
@@ -48,26 +50,31 @@ function getLocalizedUrl(locale: string | undefined, path: string) {
     class='z-30 text-xl font-semibold group-[.not-top]:ms-2 sm:group-[.not-top]:ms-3'
     style='transition:margin-inline 0.3s'
     href={getLocalizedUrl(Astro.currentLocale, '/')}
-    aria-label='Brand'>{config.title}</a
+    aria-label={isEnglish ? 'Return home' : '返回首页'}>{config.title}</a
   >
 
   <div class='flex items-center gap-x-2'>
     {/* Menu links */}
-    <div
+    <nav
       id='headerExpandConetent'
-      class='end-0 start-0 top-12 grid border border-transparent group-[.not-top]:rounded-xl group-[.expanded]:opacity-100 dark:group-[.expanded.not-top]:bg-muted/60 max-md:absolute max-md:opacity-0 max-md:pointer-events-none max-md:group-[.expanded]:pointer-events-auto max-md:group-[.not-top]:border-border max-md:group-[.expanded.not-top]:bg-background/60 max-md:group-[.expanded.not-top]:backdrop-blur-md max-md:group-[.not-top]:px-4 max-md:group-[.not-top]:py-2 md:grid-rows-1'
+      aria-label={isEnglish ? 'Main navigation' : '主导航'}
+      class='end-0 start-0 top-12 grid border border-transparent max-md:invisible max-md:absolute max-md:rounded-xl max-md:border-border max-md:bg-card max-md:px-4 max-md:py-2 max-md:group-[.expanded]:visible md:grid-rows-1'
     >
       <div class='flex flex-col items-center justify-center md:flex-row'>
         {
           (config.header?.menu || []).map((item: any) => {
             const isBlogMenu = item.link === '/blog/research' || item.title === 'Blog'
+            const url = getLocalizedUrl(Astro.currentLocale, item.link)
+            const current = currentPath === url || (item.link === '/blog' && currentPath.startsWith(`${url}/`))
+              ? 'page'
+              : undefined
             if (isBlogMenu && categories.length > 0) {
               return (
                 <div class='menu-item-with-dropdown relative w-full md:w-fit' style='position: relative;'>
                   <a
-                    href={getLocalizedUrl(Astro.currentLocale, item.link)}
+                    href={url}
                     class='blog-menu-link flex w-full flex-none items-center justify-end py-2 font-medium transition-none hover:text-primary md:px-3 md:justify-center'
-                    aria-current={Astro.url.pathname.replace(/\/$/, '') === getLocalizedUrl(Astro.currentLocale, item.link) ? 'page' : undefined}
+                    aria-current={current}
                   >
                     {Astro.currentLocale === 'en' ? englishLabels[item.title] ?? item.title : item.title}
                     <Icon name='chevron-down' class='chevron-icon ml-1 size-4 transition-transform' />
@@ -91,9 +98,9 @@ function getLocalizedUrl(locale: string | undefined, path: string) {
             
             return (
               <a
-                href={getLocalizedUrl(Astro.currentLocale, item.link)}
+                href={url}
                 class='w-full flex-none grow py-2 text-right font-medium transition-none hover:text-primary md:w-fit md:px-3'
-                aria-current={Astro.url.pathname.replace(/\/$/, '') === getLocalizedUrl(Astro.currentLocale, item.link) ? 'page' : undefined}
+                aria-current={current}
               >
                 {Astro.currentLocale === 'en' ? englishLabels[item.title] ?? item.title : item.title}
               </a>
@@ -101,13 +108,13 @@ function getLocalizedUrl(locale: string | undefined, path: string) {
           })
         }
         <div class='flex w-full grow flex-row justify-end gap-x-3 md:w-fit md:gap-x-5'>
-          <a class='px-1 py-2 transition-none md:px-2' href={getLocalizedUrl(Astro.currentLocale, '/search')} title='Search'>
-            <span class='sr-only'>Search</span>
+          <a class='px-1 py-2 transition-none md:px-2' href={getLocalizedUrl(Astro.currentLocale, '/search')} title={isEnglish ? 'Search' : '搜索'}>
+            <span class='sr-only'>{isEnglish ? 'Search' : '搜索'}</span>
             <Icon name='search' class='size-5' />
           </a>
         </div>
       </div>
-    </div>
+    </nav>
 
     <!-- buttons -->
     <div class='z-30 flex gap-x-4 group-[.not-top]:gap-x-2' style='transition:gap 0.3s'>
@@ -123,9 +130,11 @@ function getLocalizedUrl(locale: string | undefined, path: string) {
       </button>
       <button
         id='toggleMenu'
+        aria-controls='headerExpandConetent'
+        aria-expanded='false'
         class='rounded-md border p-1.5 transition-colors hover:bg-border md:hidden md:group-[.not-top]:rounded-xl'
       >
-        <span class='sr-only'>Menu</span>
+        <span class='sr-only'>{isEnglish ? 'Menu' : '菜单'}</span>
         <Icon class='size-5' name='menu' />
       </button>
     </div>
@@ -171,8 +180,10 @@ function getLocalizedUrl(locale: string | undefined, path: string) {
       })
 
       // Menu
-      this.querySelector('#toggleMenu')?.addEventListener('click', () => {
-        this.classList.toggle('expanded')
+      const menuButton = this.querySelector('#toggleMenu')
+      menuButton?.addEventListener('click', () => {
+        const expanded = this.classList.toggle('expanded')
+        menuButton.setAttribute('aria-expanded', String(expanded))
       })
     }
   }
@@ -181,6 +192,12 @@ function getLocalizedUrl(locale: string | undefined, path: string) {
 </script>
 
 <style>
+  nav a[aria-current='page'] {
+    color: hsl(var(--primary));
+    text-decoration: underline;
+    text-underline-offset: 0.3em;
+  }
+
   header-component {
     transition:
       padding 0.3s,

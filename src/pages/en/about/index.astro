@@ -1,8 +1,3 @@
 ---
-import PageLayout from '@/layouts/CommonPage.astro'
-import config from '@/site-config'
+return Astro.redirect('/en', 301)
 ---
-
-<PageLayout title='About' info={{ slug: '/about', hideComment: true }}>
-  <p>{config.description_en}</p>
-</PageLayout>

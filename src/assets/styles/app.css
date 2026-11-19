@@ -41,47 +41,70 @@
 
 @layer base {
   :root {
-    --background: 210 33% 99%;
-    --foreground: 240 10% 3.9%;
-    --card: 0 0% 100%;
+    --background: 46 28% 97%;
+    --foreground: 150 18% 12%;
+    --card: 48 42% 99%;
     --card-foreground: 240 10% 3.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
-    --primary: 200 29% 45%;
+    --primary: 146 28% 32%;
     --primary-foreground: 0 0% 92.5%;
     --secondary: 240 4.8% 95.9%;
     --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95%;
-    --muted-foreground: 240 3.8% 28.1%;
+    --muted: 46 20% 93%;
+    --muted-foreground: 145 9% 34%;
     --accent: 240 4.8% 95.9%;
     --accent-foreground: 240 5.9% 10%;
     --destructive: 0 72.22% 50.59%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 88%;
+    --border: 46 16% 85%;
     --input: 240 5.9% 90%;
     --ring: 240 5.9% 10%;
     --radius: 0.5rem;
   }
   .dark {
-    --background: 240 20.54% 5.2%;
+    --background: 155 10% 10%;
     --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
+    --card: 150 9% 13%;
     --card-foreground: 0 0% 98%;
     --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
-    --primary: 195 95% 85%;
+    --primary: 143 33% 73%;
     --primary-foreground: 240 3.7% 15.9%;
     --secondary: 240 3.7% 15.9%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 240 5.9% 12%;
+    --muted: 149 8% 19%;
     --muted-foreground: 240 5% 74.9%;
     --accent: 240 3.7% 15.9%;
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 19.9%;
+    --border: 149 8% 27%;
     --input: 240 3.7% 15.9%;
     --ring: 240 4.9% 83.9%;
+  }
+}
+
+@layer components {
+  .site-column {
+    @apply mx-auto max-w-[52rem];
+  }
+
+  .site-panel {
+    @apply rounded-xl border bg-card p-5 sm:p-7;
+  }
+
+  .site-page-title {
+    @apply break-words text-3xl font-semibold tracking-tight sm:text-4xl;
+  }
+
+  .site-section-title {
+    @apply text-lg font-semibold sm:text-xl;
+  }
+
+  .site-text-link {
+    @apply text-sm font-medium text-primary hover:underline;
+    text-underline-offset: 0.2em;
   }
 }
 

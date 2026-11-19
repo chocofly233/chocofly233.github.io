@@ -46,7 +46,7 @@ const primaryColor = data.heroImage?.color ?? 'hsl(var(--primary) / var(--tw-tex
 <PageLayout
   meta={{ articleDate, description, ogImage: socialImage, title }}
   highlightColor={primaryColor}
-  back={Astro.currentLocale === 'en' ? '/en/archives' : '/archives'}
+  back={Astro.currentLocale === 'en' ? '/en/blog' : '/blog'}
 >
   {!!headings.length && <TOC {headings} slot='sidebar' />}
 

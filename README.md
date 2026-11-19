@@ -1,6 +1,6 @@
 # 页边笔记
 
-基于 [Axi-Theme](https://github.com/Axi404/Axi-Theme) 的 Astro 博客。保留主题的深浅色切换、文章归档、标签、Pagefind 搜索和 RSS。首页展示最新文章。「页边笔记」是暂定站名，首篇文章是示例。
+基于 [Axi-Theme](https://github.com/Axi404/Axi-Theme) 的 Astro 博客。保留主题的深浅色切换、文章归档、标签、Pagefind 搜索和 RSS。首页分为个人信息、学籍，以及包含文章、获奖和最新博客的内容区。`/blog` 是博客入口。「页边笔记」是暂定站名，首篇文章是示例。
 
 ## 本地预览
 
@@ -16,7 +16,7 @@ pnpm dev
 ## 更新内容
 
 - 站名、作者名、描述和公开联系方式在 `src/site.config.ts`。
-- 中文「关于」页在 `src/pages/about/index.astro`。
+- 姓名、邮箱和学籍在 `src/profile.ts`。文章和获奖标题在 `src/components/home/PersonalHome.astro`。
 - 中文文章放在 `src/content/blogs/文章目录/index.md`。英文译文可放在同目录的 `index-en.md`。参考 `hello-blog` 中的示例。
 - favicon 在 `public/favicon/`。默认分享封面在 `public/images/social-card.webp`。
 
