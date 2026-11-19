@@ -58,7 +58,7 @@ const isEnglish = Astro.currentLocale === 'en'
     <nav
       id='headerExpandConetent'
       aria-label={isEnglish ? 'Main navigation' : '主导航'}
-      class='end-0 start-0 top-12 grid border border-transparent max-md:invisible max-md:absolute max-md:rounded-xl max-md:border-border max-md:bg-card max-md:px-4 max-md:py-2 max-md:group-[.expanded]:visible md:grid-rows-1'
+      class='end-0 start-0 top-12 grid border border-transparent max-md:hidden max-md:absolute max-md:rounded-xl max-md:border-border max-md:bg-card max-md:px-4 max-md:py-2 max-md:group-[.expanded]:grid md:grid-rows-1'
     >
       <div class='flex flex-col items-center justify-center md:flex-row'>
         {
@@ -225,53 +225,6 @@ const isEnglish = Astro.currentLocale === 'en'
     }
   }
  
-
-  /* header menu */
-  @media (max-width: 768px) {
-    #headerExpandConetent {
-      grid-template-rows: 0fr;
-      transition:
-        opacity 0.3s,
-        padding 0.3s,
-        border-color 0.15s,
-        grid-template-rows 0.3s,
-        backdrop-filter 0.15s,
-        background-color 0.15s;
-    }
-    .expanded #headerExpandConetent {
-      grid-template-rows: 1fr;
-    }
-    .expanded.not-top #headerExpandConetent {
-      box-shadow:
-        rgb(255, 255, 255) 0px 0px 0px 0px,
-        rgba(24, 24, 27, 0.08) 0px 0px 0px 1px,
-        rgba(39, 39, 42, 0.08) 0px 10px 15px -3px,
-        rgba(39, 39, 42, 0.08) 0px 4px 6px -4px;
-    }
-
-    /* header component after */
-    header-component #headerExpandConetent::after {
-      box-sizing: content-box;
-      content: '';
-      position: absolute;
-      inset-inline: calc(-1rem - 1px);
-      bottom: 0;
-      top: -5rem;
-      z-index: -1;
-      transition: all 0.3s;
-      visibility: hidden;
-      opacity: 0;
-      border-bottom: 1px solid transparent;
-    }
-    header-component:not(.not-top) #headerExpandConetent::after {
-      visibility: visible;
-      bottom: -1rem;
-      opacity: 1;
-      background-color: hsl(var(--muted) / 0.6);
-      backdrop-filter: blur(12px);
-      border-bottom-color: hsl(var(--border) / var(--tw-border-opacity, 1));
-    }
-  }
 
   /* dark light mode toggle */
   #toggleDarkMode {
